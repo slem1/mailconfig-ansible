@@ -1,0 +1,7 @@
+---
+- name: create system mail user
+  user:
+    name: "{{ mail_user }}"
+  become: yes
+- import_tasks: postfix.yml
+- import_tasks: dovecot.yml

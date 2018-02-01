@@ -1,0 +1,62 @@
+- name: create repo directory
+  file:
+    state: directory
+    path: "{{ deploy_repo }}"
+- name: create install directory
+  file:
+    state: directory
+    path: "{{ roundcube_install }}"
+  become: yes
+- name: create temp dir for roundcube
+  tempfile:
+    state: directory
+  register: temp_dir
+- name: install roundcube dependencies
+  yum:
+    state: installed
+    name:
+      - php-xml
+      - php-pdo
+      - php-mbstring
+  become: yes
+  notify: restart php-fpm
+- name: check if roundcube is already available
+  stat:
+    path: "{{ deploy_repo}}{{ roundcube_archive }}"
+  register: rc_stat
+- name: download roundcube
+  get_url:
+    url: "{{ roundcube_url }}"
+    dest : "{{ deploy_repo }}"
+    checksum: "{{ roundcube_sha256 }}"
+  when: rc_stat.stat.exists == False
+- name: unarchive roundcube in temp
+  unarchive:
+    src: "{{ deploy_repo}}{{ roundcube_archive }}"
+    dest: "{{ temp_dir.path }}/"
+    remote_src: yes
+  changed_when: False
+- name: add roundcube configuration
+  template:
+    src: "templates/config.inc.php"
+    dest: "{{ temp_dir.path }}/{{ roundcube_name }}/config/"
+  changed_when: False
+- name: install roundcube
+  synchronize:
+    src: "{{ temp_dir.path }}/{{ roundcube_name }}/"
+    dest: "{{ roundcube_install }}"
+  delegate_to: "{{ inventory_hostname }}"
+  become: yes
+- name: owner and membership roundcube
+  file:
+    dest: "{{ roundcube_install }}"
+    group: nginx
+    owner: nginx
+    recurse: yes
+  become: yes
+- name: add nginx php conf for virtual host
+  copy:
+    src: "files/php.conf"
+    dest: "{{ nginx_vhost_conf_dir }}"
+  notify: restart nginx
+  become: yes

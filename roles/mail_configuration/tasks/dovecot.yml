@@ -1,0 +1,51 @@
+- name: install dovecot (imap3 pop3)
+  yum:
+    state: installed
+    name: dovecot
+  become: yes
+- name: start and enable dovecot
+  systemd:
+    name: dovecot
+    state: started
+    enabled: yes
+  become: yes
+- name: temp dir for dovecot users file
+  tempfile:
+    state: directory
+  register: temp_dir
+  become: yes
+  become_user: "{{ mail_user }}"
+  changed_when: false
+- name: create dovecot user file
+  shell: "echo $(echo $USER):$(doveadm pw -s SHA512-CRYPT -p {{ dovecot_mail_user_password }}):$(id -u):$(id -g)::$(echo $HOME) > {{ temp_dir.path }}/users"
+  become: yes
+  become_user: "{{ mail_user }}"
+  changed_when: false
+- name: add dovecot users
+  copy:
+    remote_src: yes
+    src: "{{ temp_dir.path }}/users"
+    dest: "/etc/dovecot/"
+  notify: reload dovecot
+  become: yes
+- name: create mail dir in {{ mail_user }} home
+  file:
+    path: "~/mail"
+    state: directory
+  become: yes
+  become_user: "{{ mail_user }}"
+- name: set /var/mail/{{ mail_user }} permission for dovecot
+  file:
+    path: "/var/mail/{{ mail_user }}"
+    mode: 0600
+  become: yes
+- name: copy dovecot configuration
+  copy:
+    src: "{{ item }}"
+    dest: /etc/dovecot/conf.d/
+  with_items:
+    - "files/dovecot/10-auth.conf"
+    - "files/dovecot/10-mail.conf"
+    - "files/dovecot/10-ssl.conf"
+  notify: reload dovecot
+  become: yes

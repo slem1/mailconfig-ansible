@@ -1,0 +1,25 @@
+- name: install postfix
+  yum:
+    state: installed
+    name: postfix
+  become: yes
+- name: start and enable postfix
+  systemd:
+    name: postfix
+    state: started
+    enabled: yes
+  become: yes
+- name: add postfix main configuration
+  template:
+    src: "templates/postfix/main.cf"
+    dest: "/etc/postfix/main.cf"
+  notify: reload postfix-main
+  become: yes
+- name: add postfix virtual configuration
+  template:
+    src: "templates/postfix/virtual"
+    dest: "/etc/postfix/virtual"
+  notify:
+    - reload postfix-virtual
+    - reload postfix-main
+  become: yes

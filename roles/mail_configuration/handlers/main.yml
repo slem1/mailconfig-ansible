@@ -1,0 +1,14 @@
+- name: reload postfix-main
+  shell: postfix reload
+  changed_when: False
+  become: yes
+
+- name: reload postfix-virtual
+  shell: postmap /etc/postfix/virtual
+  changed_when: False
+  become: yes
+
+- name: reload dovecot
+  shell: doveadm reload
+  changed_when: False
+  become: yes

@@ -1,0 +1,31 @@
+- name: install epel-release
+  yum:
+    name: epel-release
+    state: latest
+  become: yes
+- name: install nginx
+  yum:
+    name: nginx
+    state: latest
+  become: yes
+- name: copy default server conf
+  copy:
+    src: "files/default.conf"
+    dest: "/etc/nginx/conf.d/"
+  become: yes
+- name: copy default ssl conf
+  copy:
+    src: "files/default_ssl.conf"
+    dest: "/etc/nginx/conf.d/default_ssl.conf.disabled"
+  become: yes
+- name: copy default nginx conf
+  copy:
+    src: "files/nginx.conf"
+    dest: "/etc/nginx/"
+  become: yes
+- name: start nginx
+  service:
+    name: nginx
+    state: started
+    enabled: yes
+  become: yes

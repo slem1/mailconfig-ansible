@@ -1,0 +1,17 @@
+---
+- hosts: appdev
+  roles:
+    - role: mail_configuration
+      mail_user: mailuser
+      dovecot_mail_user_password: mailuser
+      postfix_myhostname: localhost
+      postfix_mydomain: localdomain
+      virtual_alias_domains: mycompany.com gmail.com
+      virtual_alias_domains_mappings: ['@mycompany.com', '@gmail.com']
+
+    - role: nginx_install
+
+    - role: nginx_php
+
+    - role: roundcube_deploy
+      nginx_vhost_conf_dir: /etc/nginx/default.d

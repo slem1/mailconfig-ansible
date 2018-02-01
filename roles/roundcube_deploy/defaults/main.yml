@@ -1,0 +1,15 @@
+deploy_repo: "/home/deploy/repo/"
+
+roundcube_sha256: "sha256:05d9856c966c0d93accabf724e7ff2fd493bba1a57c44247ed0a2aacd617c879"
+
+roundcube_name: "roundcubemail-1.3.3"
+roundcube_archive: "{{ roundcube_name }}-complete.tar.gz"
+roundcube_url: "https://github.com/roundcube/roundcubemail/releases/download/1.3.3/{{ roundcube_archive }}"
+
+roundcube_install: "/usr/share/nginx/html/webmail"
+
+roundcube_config_datasource: sqlite:////usr/share/nginx/html/webmail/roundcubemail.db?mode=0646
+roundcube_config_db_prefix:
+roundcube_config_des_key: K0KI1FLepBiM43uituuinwC3
+
+nginx_vhost_conf_dir:

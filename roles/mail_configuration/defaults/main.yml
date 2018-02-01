@@ -1,0 +1,8 @@
+postfix_myhostname:
+postfix_mydomain:
+
+virtual_alias_domains: 
+virtual_alias_domains_mappings:
+
+mail_user:
+mail_user_password:

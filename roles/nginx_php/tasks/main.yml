@@ -1,0 +1,41 @@
+- name: install epel-release
+  yum:
+    name: epel-release
+    state: latest
+  become: yes
+- name: install nginx
+  yum:
+    name: nginx
+    state: latest
+  become: yes
+- name: install php dependencies
+  yum:
+    state: installed
+    name:
+      - php
+      - php-fpm
+  become: yes
+- name: allow php session for nginx
+  file:
+    owner: nginx
+    path: "/var/lib/php"
+    recurse: yes
+  become: yes
+- name: start php-fpm
+  systemd:
+    name: php-fpm
+    enabled: yes
+    state: started
+  become: yes
+- name: copy php fastcgi configuration in nginx
+  copy:
+    src: "files/php_fastcgi"
+    dest: "/etc/nginx/"
+  notify: restart php-fpm
+  become: yes
+- name: copy php-fpm configuration
+  copy:
+    src: "files/www.conf"
+    dest: "/etc/php-fpm.d/"
+  notify: restart nginx
+  become: yes
